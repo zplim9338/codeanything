@@ -1,3 +1,3 @@
-package com.example.codeanything.Test;
+package com.codeanything.modules.test;
 
 public record Test(Integer status, String msg) {}
