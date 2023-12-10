@@ -9,4 +9,9 @@ public class TestController {
     public Test getTestMsg(@RequestParam(value = "name", defaultValue = "World") String pName) {
         return new Test(0, "Hello " + pName);
 	}
+
+    @GetMapping("/test/getgreetingmsg")
+    public String getGreetingMsg(@RequestParam(value = "name", defaultValue = "World") String pName) {
+        return "HELLO " + pName;
+    }
 }
