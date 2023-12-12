@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface UserService {
     // TUserAccount createUserAccount(TUserAccount pUserAccount);
-    // List<TUserAccount> getUserAccountList();
+    List<TUserAccount> getUserAccountList();
     String getUserAccountTest();
     //Other methods as needed
 }
