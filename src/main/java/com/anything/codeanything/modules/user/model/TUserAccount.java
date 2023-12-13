@@ -2,7 +2,7 @@ package com.anything.codeanything.modules.user.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import java.sql.Timestamp;
+import java.time.Instant;
 
 @Entity
 @Table(name = "T_USER_ACCOUNT")
@@ -21,12 +21,11 @@ public class TUserAccount {
     @JsonProperty("password_hash")
     private String password_hash;
     @JsonProperty("created_date")
-    private Timestamp created_date;
+    private Instant created_date;
     @JsonProperty("updated_date")
-    private Timestamp updated_date;
+    private Instant updated_date;
 
-    public TUserAccount(Integer user_id,String username, String email, String password_salt,String password_hash,Timestamp created_date,Timestamp updated_date){
-        this.user_id = user_id;
+    public TUserAccount(String username, String email, String password_salt,String password_hash,Instant created_date,Instant updated_date){
         this.username = username;
         this.email = email;
         this.password_salt = password_salt;
@@ -34,6 +33,36 @@ public class TUserAccount {
         this.created_date = created_date;
         this.updated_date = updated_date;
     }
+
     public TUserAccount() {
     }
+
+    public Integer getUserId(){
+        return this.user_id;
+    }
+
+    public String getUsername(){
+        return this.username;
+    }
+
+    public void setUsername(String pUsername){
+        this.username = pUsername;
+    }
+
+    public String getEmail(){
+        return this.username;
+    }
+
+    public void setEmail(String pEmail){
+        this.email = pEmail;
+    }
+
+    public void setPasswordHash(String pPasswordHash){
+        this.password_hash = pPasswordHash;
+    }
+
+    public void setPasswordSalt(String pPasswordSalt){
+        this.password_salt = pPasswordSalt;
+    }
+
 }

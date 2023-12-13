@@ -1,7 +1,6 @@
 package com.anything.codeanything.modules.user.contoller;
 
 import com.anything.codeanything.modules.user.model.TUserAccount;
-import com.anything.codeanything.modules.user.repository.UserRepository;
 import com.anything.codeanything.modules.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,12 +19,20 @@ public class UserController {
       this.userService = userService;
     }
 
-    @GetMapping("/all")
+    @PostMapping("/user-sign-up")
+    public ResponseEntity<TUserAccount> UserSignUp(@RequestBody TUserAccount pTUserAccount){
+        String pPlaintextPassword = "12333";
+        TUserAccount userAccount = userService.userSignUp(pTUserAccount, pPlaintextPassword);
+        //return new ResponseEntity<TUserAccount>("Product created successfully", HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.OK).body(userAccount);
+    }
+
+    @GetMapping("/get-user-account-list")
     public List<TUserAccount> getUserAccountList() {
         return userService.getUserAccountList();
     }
 
-    @GetMapping("/alltest")
+    @GetMapping("/test-get-user-account-list")
     public ResponseEntity<List<TUserAccount>> getUserAccountListv2() {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserAccountList());
     }
