@@ -50,15 +50,23 @@ public class TUserAccount {
     }
 
     public String getEmail(){
-        return this.username;
+        return this.email;
     }
 
     public void setEmail(String pEmail){
         this.email = pEmail;
     }
 
+    public String getPasswordHash(){
+        return this.password_hash;
+    }
+
     public void setPasswordHash(String pPasswordHash){
         this.password_hash = pPasswordHash;
+    }
+
+    public String getPasswordSalt(){
+        return this.password_salt;
     }
 
     public void setPasswordSalt(String pPasswordSalt){

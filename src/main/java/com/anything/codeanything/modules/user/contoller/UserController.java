@@ -1,6 +1,7 @@
 package com.anything.codeanything.modules.user.contoller;
 
 import com.anything.codeanything.modules.user.model.TUserAccount;
+import com.anything.codeanything.modules.user.model.UserAccount;
 import com.anything.codeanything.modules.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +21,8 @@ public class UserController {
     }
 
     @PostMapping("/user-sign-up")
-    public ResponseEntity<TUserAccount> UserSignUp(@RequestBody TUserAccount pTUserAccount){
-        String pPlaintextPassword = "12333";
-        TUserAccount userAccount = userService.userSignUp(pTUserAccount, pPlaintextPassword);
+    public ResponseEntity<TUserAccount> UserSignUp(@RequestBody UserAccount pUserAccount){
+        TUserAccount userAccount = userService.userSignUp(pUserAccount.getTUserAccount(), pUserAccount.getRawPassword());
         //return new ResponseEntity<TUserAccount>("Product created successfully", HttpStatus.CREATED);
         return ResponseEntity.status(HttpStatus.OK).body(userAccount);
     }
