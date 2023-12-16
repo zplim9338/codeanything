@@ -2,6 +2,7 @@ package com.anything.codeanything.modules.user.contoller;
 
 import com.anything.codeanything.modules.user.model.TUserAccount;
 import com.anything.codeanything.modules.user.model.UserAccountDetails;
+import com.anything.codeanything.modules.user.model.ApiResponse;
 import com.anything.codeanything.modules.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,24 +22,39 @@ public class UserController {
     }
 
     @PostMapping("/user-sign-up")
-    public ResponseEntity<TUserAccount> UserSignUp(@RequestBody UserAccountDetails pUserAccountDetails){
-            TUserAccount userAccount = userService.userSignUp(pUserAccountDetails);
+    public ResponseEntity<ApiResponse<TUserAccount>> UserSignUp(@RequestBody UserAccountDetails pUserAccountDetails){
+        TUserAccount userAccount = userService.userSignUp(pUserAccountDetails);
+
         //return new ResponseEntity<TUserAccount>("Product created successfully", HttpStatus.CREATED);
-        return ResponseEntity.status(HttpStatus.OK).body(userAccount);
+        HttpStatus httpStatus = HttpStatus.OK;
+        ApiResponse<TUserAccount> response = new ApiResponse<>();
+        response.setStatus(httpStatus.value());
+        response.setMessage("User account created successful");
+        response.setData(userAccount);
+        return new ResponseEntity<>(response, httpStatus);
     }
 
     @PostMapping("/login-user")
-    public ResponseEntity<Boolean> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.loginUser(pUserAccountDetails.getLoginId(), pUserAccountDetails.getRawPassword()));
+    public ResponseEntity<ApiResponse<Boolean>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
+        Boolean status = userService.loginUser(pUserAccountDetails.getLoginId(), pUserAccountDetails.getRawPassword());
+
+        HttpStatus httpStatus = HttpStatus.OK;
+        ApiResponse<Boolean> response = new ApiResponse<>();
+        response.setStatus(httpStatus.value());
+        response.setMessage("???");
+        response.setData(status);
+        return new ResponseEntity<>(response, httpStatus);
     }
 
     @GetMapping("/get-user-account-list")
-    public List<TUserAccount> getUserAccountList() {
-        return userService.getUserAccountList();
-    }
+    public ResponseEntity<ApiResponse<List<TUserAccount>>> getUserAccountList() {
+        List<TUserAccount> userAccountList = userService.getUserAccountList();
 
-    @GetMapping("/test-get-user-account-list")
-    public ResponseEntity<List<TUserAccount>> getUserAccountListv2() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserAccountList());
+        HttpStatus httpStatus = HttpStatus.OK;
+        ApiResponse<List<TUserAccount>> response = new ApiResponse<>();
+        response.setStatus(httpStatus.value());
+        response.setMessage("???");
+        response.setData(userAccountList);
+        return new ResponseEntity<>(response, httpStatus);
     }
 }
