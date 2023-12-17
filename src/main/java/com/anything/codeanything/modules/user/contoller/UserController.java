@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequestMapping("/user")
 @RestController
@@ -38,6 +39,17 @@ public class UserController {
     public ResponseEntity<ApiResponse<Boolean>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
         Boolean status = userService.loginUser(pUserAccountDetails.getLoginId(), pUserAccountDetails.getRawPassword());
 
+        HttpStatus httpStatus = HttpStatus.OK;
+        ApiResponse<Boolean> response = new ApiResponse<>();
+        response.setStatus(httpStatus.value());
+        response.setMessage("???");
+        response.setData(status);
+        return new ResponseEntity<>(response, httpStatus);
+    }
+
+    @PostMapping("/change-user-account-password")
+    public ResponseEntity<ApiResponse<Boolean>> ChangeUserAccountPassword(@RequestBody UserAccountDetails pUserAccountDetails) {
+        Boolean status = userService.changeUserAccountPassword(pUserAccountDetails, Optional.empty());
         HttpStatus httpStatus = HttpStatus.OK;
         ApiResponse<Boolean> response = new ApiResponse<>();
         response.setStatus(httpStatus.value());

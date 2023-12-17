@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface  UserRepository extends JpaRepository<TUserAccount, Long> {
     //Method 1
-//    @Query(value = "SELECT * FROM T_USER_ACCOUNT WHERE `email` = :email")
-//    TUserAccount findUserByEmail(@Param("email") String email);
+   @Query(value = "SELECT u FROM TUserAccount u WHERE u.email = :email")
+   TUserAccount findUserByEmail(@Param("email") String email);
 
     //Method 2
     TUserAccount findByEmailEqualsIgnoreCase(String email);

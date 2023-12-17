@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -21,10 +22,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TUserAccount userSignUp(UserAccountDetails userAccountDetails) {
+    public TUserAccount userSignUp(UserAccountDetails pUserAccountDetails) {
         String passwordSalt = this.generatePasswordSalt();
-        String passwordHash = this.generatePasswordHash(userAccountDetails.getRawPassword(), passwordSalt);
-        TUserAccount userAccount = new TUserAccount(userAccountDetails.getUsername(), userAccountDetails.getEmail(), passwordSalt, passwordHash, CurrentUTC, null);
+        String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRawPassword(), passwordSalt);
+        TUserAccount userAccount = new TUserAccount(pUserAccountDetails.getUsername(), pUserAccountDetails.getEmail(), passwordSalt, passwordHash, CurrentUTC, null);
 
         return userRepository.save(userAccount);
     }
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean loginUser(String pUsernameEmail, String pRawPassword){
-        TUserAccount userAccount = userRepository.findByEmailEqualsIgnoreCase(pUsernameEmail);
+        TUserAccount userAccount = userRepository.findUserByEmail(pUsernameEmail);
         if (userAccount == null){
             userAccount = userRepository.findByUsernameEquals(pUsernameEmail);
         }
@@ -45,6 +46,32 @@ public class UserServiceImpl implements UserService {
         }
 
         return this.validateUserPassword(userAccount, pRawPassword);
+    }
+
+    @Override
+    public boolean changeUserAccountPassword(UserAccountDetails pUserAccountDetails, Optional<Boolean> pOptionalCheckCurrentPassword){
+        Boolean checkCurrentPassword = pOptionalCheckCurrentPassword.orElse(false);
+        Boolean isValid = true;
+        TUserAccount userAccount = null;
+
+        if (isValid){
+            userAccount = userRepository.findById(pUserAccountDetails.getUserId()).orElse(null);
+            isValid = userAccount != null;
+        }
+
+        if (isValid && checkCurrentPassword){
+            isValid = this.validateUserPassword(userAccount,pUserAccountDetails.getOldPassword());
+        }
+
+        if (isValid){
+            String passwordSalt = this.generatePasswordSalt();
+            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRawPassword(), passwordSalt);
+            userAccount.setPasswordSalt(passwordSalt);
+            userAccount.setPasswordHash(passwordHash);
+            userRepository.save(userAccount);
+        }
+
+        return true;
     }
 
     private String generatePasswordHash(String pRawPassword, String pPasswordSalt){

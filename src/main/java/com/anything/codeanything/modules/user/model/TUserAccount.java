@@ -1,6 +1,5 @@
 package com.anything.codeanything.modules.user.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import java.time.Instant;
 
@@ -17,13 +16,13 @@ public class TUserAccount {
     private Instant created_date;
     private Instant updated_date;
 
-    public TUserAccount(String pUsername, String pEmail, String pPasswordSalt,String pPasswordHash,Instant pCreatedDate,Instant pUpdatedDate){
-        this.username = pUsername;
-        this.email = pEmail;
-        this.password_salt = pPasswordSalt;
-        this.password_hash = pPasswordHash;
-        this.created_date = pCreatedDate;
-        this.updated_date = pUpdatedDate;
+    public TUserAccount(String username, String email, String password_salt,String password_hash,Instant created_date,Instant updated_date){
+        this.username = username;
+        this.email = email;
+        this.password_salt = password_salt;
+        this.password_hash = password_hash;
+        this.created_date = created_date;
+        this.updated_date = updated_date;
     }
 
     public TUserAccount() {
