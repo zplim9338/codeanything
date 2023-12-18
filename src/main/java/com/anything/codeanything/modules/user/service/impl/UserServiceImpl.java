@@ -1,5 +1,6 @@
 package com.anything.codeanything.modules.user.service.impl;
 
+import com.anything.codeanything.modules.user.enums.UserStatusEnum;
 import com.anything.codeanything.modules.user.model.TUserAccount;
 import com.anything.codeanything.modules.user.model.UserAccountDetails;
 import com.anything.codeanything.modules.user.repository.UserRepository;
@@ -29,6 +30,8 @@ public class UserServiceImpl implements UserService {
         userAccount = userAccount.builder()
                 .username(pUserAccountDetails.getUsername())
                 .email(pUserAccountDetails.getEmail())
+                .force_change_password(false)
+                .account_status(Integer.parseInt(UserStatusEnum.PENDING.getCode()))
                 .password_salt(passwordSalt)
                 .password_hash(passwordHash)
                 .created_date(CurrentUTC).build();

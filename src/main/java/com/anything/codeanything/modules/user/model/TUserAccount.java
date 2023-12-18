@@ -22,6 +22,8 @@ public class TUserAccount {
     private String email;
     private String password_salt;
     private String password_hash;
+    private Boolean force_change_password;
+    private Integer account_status;
     private Instant created_date;
     private Instant updated_date;
 }
