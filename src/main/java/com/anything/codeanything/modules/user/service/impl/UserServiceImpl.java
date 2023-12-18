@@ -24,9 +24,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public TUserAccount userSignUp(UserAccountDetails pUserAccountDetails) {
         String passwordSalt = this.generatePasswordSalt();
-        String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRawPassword(), passwordSalt);
-        TUserAccount userAccount = new TUserAccount(pUserAccountDetails.getUsername(), pUserAccountDetails.getEmail(), passwordSalt, passwordHash, CurrentUTC, null);
-
+        String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
+        TUserAccount userAccount = new TUserAccount();
+        userAccount = userAccount.builder()
+                .username(pUserAccountDetails.getUsername())
+                .email(pUserAccountDetails.getEmail())
+                .password_salt(passwordSalt)
+                .password_hash(passwordHash)
+                .created_date(CurrentUTC).build();
         return userRepository.save(userAccount);
     }
 
@@ -55,19 +60,19 @@ public class UserServiceImpl implements UserService {
         TUserAccount userAccount = null;
 
         if (isValid){
-            userAccount = userRepository.findById(pUserAccountDetails.getUserId()).orElse(null);
+            userAccount = userRepository.findById(pUserAccountDetails.getUser_id()).orElse(null);
             isValid = userAccount != null;
         }
 
         if (isValid && checkCurrentPassword){
-            isValid = this.validateUserPassword(userAccount,pUserAccountDetails.getOldPassword());
+            isValid = this.validateUserPassword(userAccount,pUserAccountDetails.getOld_password());
         }
 
         if (isValid){
             String passwordSalt = this.generatePasswordSalt();
-            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRawPassword(), passwordSalt);
-            userAccount.setPasswordSalt(passwordSalt);
-            userAccount.setPasswordHash(passwordHash);
+            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
+            userAccount.setPassword_salt(passwordSalt);
+            userAccount.setPassword_hash(passwordHash);
             userRepository.save(userAccount);
         }
 
@@ -87,8 +92,8 @@ public class UserServiceImpl implements UserService {
 
     private boolean validateUserPassword(TUserAccount pUserAccount, String pRawPassword) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String passwordHash = pUserAccount.getPasswordHash();
-        String passwordSalt = pUserAccount.getPasswordSalt();
+        String passwordHash = pUserAccount.getPassword_hash();
+        String passwordSalt = pUserAccount.getPassword_salt();
         return encoder.matches(pRawPassword + passwordSalt, passwordHash);
     }
 }

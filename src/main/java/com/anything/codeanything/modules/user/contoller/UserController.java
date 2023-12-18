@@ -37,7 +37,7 @@ public class UserController {
 
     @PostMapping("/login-user")
     public ResponseEntity<ApiResponse<Boolean>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
-        Boolean status = userService.loginUser(pUserAccountDetails.getLoginId(), pUserAccountDetails.getRawPassword());
+        Boolean status = userService.loginUser(pUserAccountDetails.getLogin_id(), pUserAccountDetails.getRaw_password());
 
         HttpStatus httpStatus = HttpStatus.OK;
         ApiResponse<Boolean> response = new ApiResponse<>();

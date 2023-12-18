@@ -1,5 +1,14 @@
 package com.anything.codeanything.modules.user.model;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class ApiResponse<T> {
     /*
     * For successful responses, status could hold 200 (OK), 201 (Created), or other relevant success status codes.
@@ -8,26 +17,5 @@ public class ApiResponse<T> {
     private Integer status;
     private String message;
     private T data;
-
-    public Integer getStatus(){
-        return this.status;
-    }
-    public void setStatus(Integer pStatus){
-        this.status = pStatus;
-    }
-
-    public String getMessage(){
-        return this.message;
-    }
-    public void setMessage(String pMessage){
-        this.message = pMessage;
-    }
-
-    public T getData(){
-        return this.data;
-    }
-    public void setData(T pData){
-        this.data = pData;
-    }
 
 }
