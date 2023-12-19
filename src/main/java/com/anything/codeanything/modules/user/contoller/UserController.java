@@ -1,8 +1,9 @@
 package com.anything.codeanything.modules.user.contoller;
 
+import com.anything.codeanything.modules.user.model.ApiRequest;
+import com.anything.codeanything.modules.user.model.ApiResponse;
 import com.anything.codeanything.modules.user.model.TUserAccount;
 import com.anything.codeanything.modules.user.model.UserAccountDetails;
-import com.anything.codeanything.modules.user.model.ApiResponse;
 import com.anything.codeanything.modules.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import java.util.Optional;
 @RequestMapping("/user")
 @RestController
 public class UserController {
-
+    private final String mModule = "user";
     private final UserService userService;
     @Autowired
     public UserController(UserService userService) {
@@ -36,15 +37,26 @@ public class UserController {
     }
 
     @PostMapping("/login-user")
-    public ResponseEntity<ApiResponse<Boolean>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
-        Boolean status = userService.loginUser(pUserAccountDetails.getLogin_id(), pUserAccountDetails.getRaw_password());
+    public ResponseEntity<ApiResponse<TUserAccount>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
+        ApiRequest<UserAccountDetails, TUserAccount> request = ApiRequest.<UserAccountDetails, TUserAccount>builder()
+                .status(true).data(pUserAccountDetails).build();
+        try{
+            userService.loginUser(request);
+            HttpStatus httpStatus = HttpStatus.OK;
+            ApiResponse<TUserAccount> response = ApiResponse.<TUserAccount>builder()
+                    .status(httpStatus.value())
+                    .message(request.getMessage())
+                    .data(request.getResult()).build();
 
-        HttpStatus httpStatus = HttpStatus.OK;
-        ApiResponse<Boolean> response = new ApiResponse<>();
-        response.setStatus(httpStatus.value());
-        response.setMessage("???");
-        response.setData(status);
-        return new ResponseEntity<>(response, httpStatus);
+            return new ResponseEntity<>(response, httpStatus);
+        }catch (Exception ex){
+            HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+            ApiResponse<TUserAccount> response = ApiResponse.<TUserAccount>builder()
+                    .status(httpStatus.value())
+                    .message(ex.getMessage())
+                    .data(null).build();
+            return new ResponseEntity<>(response, httpStatus);
+        }
     }
 
     @PostMapping("/change-user-account-password")

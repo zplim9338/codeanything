@@ -1,6 +1,7 @@
 package com.anything.codeanything.modules.user.service.impl;
 
 import com.anything.codeanything.modules.user.enums.UserStatusEnum;
+import com.anything.codeanything.modules.user.model.ApiRequest;
 import com.anything.codeanything.modules.user.model.TUserAccount;
 import com.anything.codeanything.modules.user.model.UserAccountDetails;
 import com.anything.codeanything.modules.user.repository.UserRepository;
@@ -31,7 +32,7 @@ public class UserServiceImpl implements UserService {
                 .username(pUserAccountDetails.getUsername())
                 .email(pUserAccountDetails.getEmail())
                 .force_change_password(false)
-                .account_status(Integer.parseInt(UserStatusEnum.PENDING.getCode()))
+                .account_status(UserStatusEnum.PENDING.getCode())
                 .password_salt(passwordSalt)
                 .password_hash(passwordHash)
                 .created_date(CurrentUTC).build();
@@ -44,16 +45,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean loginUser(String pUsernameEmail, String pRawPassword){
-        TUserAccount userAccount = userRepository.findUserByEmail(pUsernameEmail);
-        if (userAccount == null){
-            userAccount = userRepository.findByUsernameEquals(pUsernameEmail);
+    public void loginUser(ApiRequest<UserAccountDetails, TUserAccount> request){
+        boolean status = true;
+        String message = "Login Successfully";
+        UserAccountDetails data = request.getData();
+        String loginId = data.getLogin_id();
+        String rawPassword = data.getRaw_password();
+
+        TUserAccount userAccount = userRepository.findUserByEmail(loginId);
+        if (userAccount == null) {
+            userAccount = userRepository.findByUsernameEquals(loginId);
         }
-        if (userAccount == null){
-            return false;
+        if (userAccount == null) {
+            status = false;
+            message = "Account/Password is mismatched.";
+        }
+        if (status){
+            status = this.validateUserPassword(userAccount, rawPassword);
+            if(!status){message = "Account/Password is mismatched.";}
         }
 
-        return this.validateUserPassword(userAccount, pRawPassword);
+        //RETURN DATA
+        request.setStatus(status);
+        request.setMessage(message);
+        request.setResult(userAccount);
     }
 
     @Override
@@ -68,7 +83,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (isValid && checkCurrentPassword){
-            isValid = this.validateUserPassword(userAccount,pUserAccountDetails.getOld_password());
+            isValid = this.validateUserPassword(userAccount, pUserAccountDetails.getOld_password());
         }
 
         if (isValid){

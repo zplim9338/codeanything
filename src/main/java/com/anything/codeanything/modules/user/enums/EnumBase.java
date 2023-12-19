@@ -1,6 +1,6 @@
 package com.anything.codeanything.modules.user.enums;
 
 public interface EnumBase {
-    String getCode();
+    Integer getCode();
     String getDescription();
 }
