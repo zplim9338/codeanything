@@ -6,13 +6,12 @@ import com.anything.codeanything.modules.user.model.UserAccountDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public interface UserService {
-    TUserAccount userSignUp(UserAccountDetails userAccountDetails);
+    void userSignUp(ApiRequest<UserAccountDetails, TUserAccount> request);
     void loginUser(ApiRequest<UserAccountDetails, TUserAccount> request);
-    boolean changeUserAccountPassword(UserAccountDetails userAccountDetails, Optional<Boolean> pOptionalCheckCurrentPassword);
-    List<TUserAccount> getUserAccountList();
+    void changeUserAccountPassword(ApiRequest<UserAccountDetails, Boolean> request);
+    void getUserAccountList(ApiRequest<Object, List<TUserAccount>> request);
     //Other methods as needed
 }

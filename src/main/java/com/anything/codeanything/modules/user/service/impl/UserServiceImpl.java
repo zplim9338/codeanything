@@ -9,9 +9,9 @@ import com.anything.codeanything.modules.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,31 +24,48 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TUserAccount userSignUp(UserAccountDetails pUserAccountDetails) {
+    public void userSignUp(ApiRequest<UserAccountDetails, TUserAccount> request) {
+        Boolean status = true;
+        String message = "Sign Up Successfully";
+        UserAccountDetails data = request.getInput();
+
         String passwordSalt = this.generatePasswordSalt();
-        String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
-        TUserAccount userAccount = new TUserAccount();
-        userAccount = userAccount.builder()
-                .username(pUserAccountDetails.getUsername())
-                .email(pUserAccountDetails.getEmail())
+        String passwordHash = this.generatePasswordHash(data.getRaw_password(), passwordSalt);
+        TUserAccount userAccount = TUserAccount.builder()
+                .username(data.getUsername())
+                .email(data.getEmail())
                 .force_change_password(false)
                 .account_status(UserStatusEnum.PENDING.getCode())
                 .password_salt(passwordSalt)
                 .password_hash(passwordHash)
                 .created_date(CurrentUTC).build();
-        return userRepository.save(userAccount);
+
+        TUserAccount output = userRepository.save(userAccount);
+
+        //RETURN DATA
+        request.setStatus(status);
+        request.setMessage(message);
+        request.setOutput(output);
     }
 
     @Override
-    public List<TUserAccount> getUserAccountList() {
-        return userRepository.findAll();
+    public void getUserAccountList(ApiRequest<Object, List<TUserAccount>>request) {
+        Boolean status = true;
+        String message = "";
+        List<TUserAccount> output = userRepository.findAll();
+        message = String.valueOf(output.size()) + " User Account(s).";
+
+        //RETURN DATA
+        request.setStatus(status);
+        request.setMessage(message);
+        request.setOutput(output);
     }
 
     @Override
     public void loginUser(ApiRequest<UserAccountDetails, TUserAccount> request){
-        boolean status = true;
+        Boolean status = true;
         String message = "Login Successfully";
-        UserAccountDetails data = request.getData();
+        UserAccountDetails data = request.getInput();
         String loginId = data.getLogin_id();
         String rawPassword = data.getRaw_password();
 
@@ -68,33 +85,46 @@ public class UserServiceImpl implements UserService {
         //RETURN DATA
         request.setStatus(status);
         request.setMessage(message);
-        request.setResult(userAccount);
+        request.setOutput(status?userAccount:new TUserAccount());
     }
 
     @Override
-    public boolean changeUserAccountPassword(UserAccountDetails pUserAccountDetails, Optional<Boolean> pOptionalCheckCurrentPassword){
-        Boolean checkCurrentPassword = pOptionalCheckCurrentPassword.orElse(false);
-        Boolean isValid = true;
+    public void changeUserAccountPassword(ApiRequest<UserAccountDetails, Boolean> request){
+        Boolean status = true;
+        String message = "Password Changed Successfully";
+        UserAccountDetails data = request.getInput();
+        Boolean checkCurrentPassword = data.getCheck_current_password() != null && data.getCheck_current_password();
+
         TUserAccount userAccount = null;
 
-        if (isValid){
-            userAccount = userRepository.findById(pUserAccountDetails.getUser_id()).orElse(null);
-            isValid = userAccount != null;
+        if (status){
+            userAccount = userRepository.findById(data.getUser_id()).orElse(null);
+            status = userAccount != null;
+            if(!status) {message = "User account not found.";}
         }
 
-        if (isValid && checkCurrentPassword){
-            isValid = this.validateUserPassword(userAccount, pUserAccountDetails.getOld_password());
+        if (status && checkCurrentPassword){
+            status = this.validateUserPassword(userAccount, data.getOld_password());
+            if(!status) {message = "Current password is mismatched.";}
         }
 
-        if (isValid){
+        if (status && checkCurrentPassword){
+            status = !this.validateUserPassword(userAccount, data.getRaw_password());
+            if(!status) {message = "New password cannot be same with your current password";}
+        }
+
+        if (status){
             String passwordSalt = this.generatePasswordSalt();
-            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
+            String passwordHash = this.generatePasswordHash(data.getRaw_password(), passwordSalt);
             userAccount.setPassword_salt(passwordSalt);
             userAccount.setPassword_hash(passwordHash);
             userRepository.save(userAccount);
         }
 
-        return true;
+        //RETURN DATA
+        request.setStatus(status);
+        request.setMessage(message);
+        request.setOutput(status);
     }
 
     private String generatePasswordHash(String pRawPassword, String pPasswordSalt){

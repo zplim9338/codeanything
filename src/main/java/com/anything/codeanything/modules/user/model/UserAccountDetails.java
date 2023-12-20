@@ -16,4 +16,5 @@ public class UserAccountDetails {
     private String login_id;
     private String raw_password;
     private String old_password;
+    private Boolean check_current_password;
 }
