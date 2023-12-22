@@ -1,7 +1,7 @@
 package com.anything.codeanything.modules.user.service.impl;
 
 import com.anything.codeanything.modules.user.enums.UserStatusEnum;
-import com.anything.codeanything.modules.user.model.ApiRequest;
+import com.anything.codeanything.modules.user.model.ApiResponse;
 import com.anything.codeanything.modules.user.model.TUserAccount;
 import com.anything.codeanything.modules.user.model.UserAccountDetails;
 import com.anything.codeanything.modules.user.repository.UserRepository;
@@ -24,50 +24,45 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void userSignUp(ApiRequest<UserAccountDetails, TUserAccount> request) {
+    public void userSignUp(ApiResponse<TUserAccount> refRequest, UserAccountDetails pUserAccountDetails) {
         Boolean status = true;
         String message = "Sign Up Successfully";
-        UserAccountDetails data = request.getInput();
 
         String passwordSalt = this.generatePasswordSalt();
-        String passwordHash = this.generatePasswordHash(data.getRaw_password(), passwordSalt);
+        String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
         TUserAccount userAccount = TUserAccount.builder()
-                .username(data.getUsername())
-                .email(data.getEmail())
+                .username(pUserAccountDetails.getUsername())
+                .email(pUserAccountDetails.getEmail())
                 .force_change_password(false)
                 .account_status(UserStatusEnum.PENDING.getCode())
                 .password_salt(passwordSalt)
                 .password_hash(passwordHash)
                 .created_date(CurrentUTC).build();
 
-        TUserAccount output = userRepository.save(userAccount);
+        TUserAccount result = userRepository.save(userAccount);
 
         //RETURN DATA
-        request.setStatus(status);
-        request.setMessage(message);
-        request.setOutput(output);
+        refRequest.setStatus(status);
+        refRequest.setMessage(message);
+        refRequest.setData(result);
     }
 
     @Override
-    public void getUserAccountList(ApiRequest<Object, List<TUserAccount>>request) {
-        Boolean status = true;
-        String message = "";
-        List<TUserAccount> output = userRepository.findAll();
-        message = String.valueOf(output.size()) + " User Account(s).";
+    public void getUserAccountList(ApiResponse<List<TUserAccount>> refRequest) {
+        List<TUserAccount> result = userRepository.findAll();
 
         //RETURN DATA
-        request.setStatus(status);
-        request.setMessage(message);
-        request.setOutput(output);
+        refRequest.setStatus(true);
+        refRequest.setMessage(String.valueOf(result.size()) + " User Account(s).");
+        refRequest.setData(result);
     }
 
     @Override
-    public void loginUser(ApiRequest<UserAccountDetails, TUserAccount> request){
+    public void loginUser(ApiResponse<TUserAccount> refRequest, UserAccountDetails pUserAccountDetails){
         Boolean status = true;
         String message = "Login Successfully";
-        UserAccountDetails data = request.getInput();
-        String loginId = data.getLogin_id();
-        String rawPassword = data.getRaw_password();
+        String loginId = pUserAccountDetails.getLogin_id();
+        String rawPassword = pUserAccountDetails.getRaw_password();
 
         TUserAccount userAccount = userRepository.findUserByEmail(loginId);
         if (userAccount == null) {
@@ -83,39 +78,36 @@ public class UserServiceImpl implements UserService {
         }
 
         //RETURN DATA
-        request.setStatus(status);
-        request.setMessage(message);
-        request.setOutput(status?userAccount:new TUserAccount());
+        refRequest.setStatus(status);
+        refRequest.setMessage(message);
+        refRequest.setData(status?userAccount:new TUserAccount());
     }
 
     @Override
-    public void changeUserAccountPassword(ApiRequest<UserAccountDetails, Boolean> request){
+    public void changeUserAccountPassword(ApiResponse<Boolean> request, UserAccountDetails pUserAccountDetails, Boolean pCheckCurrentPassword){
         Boolean status = true;
         String message = "Password Changed Successfully";
-        UserAccountDetails data = request.getInput();
-        Boolean checkCurrentPassword = data.getCheck_current_password() != null && data.getCheck_current_password();
-
         TUserAccount userAccount = null;
 
         if (status){
-            userAccount = userRepository.findById(data.getUser_id()).orElse(null);
+            userAccount = userRepository.findById(pUserAccountDetails.getUser_id()).orElse(null);
             status = userAccount != null;
             if(!status) {message = "User account not found.";}
         }
 
-        if (status && checkCurrentPassword){
-            status = this.validateUserPassword(userAccount, data.getOld_password());
+        if (status && pCheckCurrentPassword){
+            status = this.validateUserPassword(userAccount, pUserAccountDetails.getOld_password());
             if(!status) {message = "Current password is mismatched.";}
         }
 
-        if (status && checkCurrentPassword){
-            status = !this.validateUserPassword(userAccount, data.getRaw_password());
+        if (status && pCheckCurrentPassword){
+            status = !this.validateUserPassword(userAccount, pUserAccountDetails.getRaw_password());
             if(!status) {message = "New password cannot be same with your current password";}
         }
 
         if (status){
             String passwordSalt = this.generatePasswordSalt();
-            String passwordHash = this.generatePasswordHash(data.getRaw_password(), passwordSalt);
+            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
             userAccount.setPassword_salt(passwordSalt);
             userAccount.setPassword_hash(passwordHash);
             userRepository.save(userAccount);
@@ -124,7 +116,7 @@ public class UserServiceImpl implements UserService {
         //RETURN DATA
         request.setStatus(status);
         request.setMessage(message);
-        request.setOutput(status);
+        request.setData(status);
     }
 
     private String generatePasswordHash(String pRawPassword, String pPasswordSalt){

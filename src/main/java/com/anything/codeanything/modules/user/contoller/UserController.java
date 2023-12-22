@@ -1,6 +1,5 @@
 package com.anything.codeanything.modules.user.contoller;
 
-import com.anything.codeanything.modules.user.model.ApiRequest;
 import com.anything.codeanything.modules.user.model.ApiResponse;
 import com.anything.codeanything.modules.user.model.TUserAccount;
 import com.anything.codeanything.modules.user.model.UserAccountDetails;
@@ -23,94 +22,71 @@ public class UserController {
       this.userService = userService;
     }
 
+    /*
+     * For successful responses, status could hold 200 (OK), 201 (Created), or other relevant success status codes.
+     * For errors, it could contain status codes such as 400 (Bad Request), 404 (Not Found), 500 (Internal Server Error), etc., indicating the nature of the error.
+     * */
+
     @PostMapping("/user-sign-up")
     public ResponseEntity<ApiResponse<TUserAccount>> UserSignUp(@RequestBody UserAccountDetails pUserAccountDetails){
-        ApiRequest<UserAccountDetails, TUserAccount> request = ApiRequest.<UserAccountDetails, TUserAccount>builder()
-                .input(pUserAccountDetails).build();
+        ApiResponse<TUserAccount> response = new ApiResponse<>();
 
         try{
-            this.userService.userSignUp(request);
-            HttpStatus httpStatus = HttpStatus.OK;
-            ApiResponse<TUserAccount> response = ApiResponse.<TUserAccount>builder()
-                    .status(httpStatus.value())
-                    .message(request.getMessage())
-                    .data(request.getOutput()).build();
-            return new ResponseEntity<>(response, httpStatus);
+            this.userService.userSignUp(response, pUserAccountDetails);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
-            HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-            ApiResponse<TUserAccount> response = ApiResponse.<TUserAccount>builder()
-                    .status(httpStatus.value())
+            response = ApiResponse.<TUserAccount>builder()
+                    .status(false)
                     .message(ex.getMessage())
                     .data(new TUserAccount()).build();
-            return new ResponseEntity<>(response, httpStatus);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/login-user")
     public ResponseEntity<ApiResponse<TUserAccount>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
-        ApiRequest<UserAccountDetails, TUserAccount> request = ApiRequest.<UserAccountDetails, TUserAccount>builder()
-                .input(pUserAccountDetails).build();
-        try{
-            this.userService.loginUser(request);
-            HttpStatus httpStatus = HttpStatus.OK;
-            ApiResponse<TUserAccount> response = ApiResponse.<TUserAccount>builder()
-                    .status(httpStatus.value())
-                    .message(request.getMessage())
-                    .data(request.getOutput()).build();
+        ApiResponse<TUserAccount> response = new ApiResponse<>();
 
-            return new ResponseEntity<>(response, httpStatus);
+        try{
+            this.userService.loginUser(response, pUserAccountDetails);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex){
-            HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-            ApiResponse<TUserAccount> response = ApiResponse.<TUserAccount>builder()
-                    .status(httpStatus.value())
+            response = ApiResponse.<TUserAccount>builder()
+                    .status(false)
                     .message(ex.getMessage())
                     .data(null).build();
-            return new ResponseEntity<>(response, httpStatus);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/change-user-account-password")
     public ResponseEntity<ApiResponse<Boolean>> ChangeUserAccountPassword(@RequestBody UserAccountDetails pUserAccountDetails) {
-        ApiRequest<UserAccountDetails, Boolean> request = ApiRequest.<UserAccountDetails, Boolean>builder()
-                .input(pUserAccountDetails).build();
+        ApiResponse<Boolean> response = new ApiResponse<>();
         try {
-            this.userService.changeUserAccountPassword(request);
-            HttpStatus httpStatus = HttpStatus.OK;
-            ApiResponse<Boolean> response = ApiResponse.<Boolean>builder()
-                    .status(httpStatus.value())
-                    .message(request.getMessage())
-                    .data(request.getOutput()).build();
-            return new ResponseEntity<>(response, httpStatus);
+            this.userService.changeUserAccountPassword(response, pUserAccountDetails,true);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
-            HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-            ApiResponse<Boolean> response = ApiResponse.<Boolean>builder()
-                    .status(httpStatus.value())
+            response = ApiResponse.<Boolean>builder()
+                    .status(false)
                     .message(ex.getMessage())
                     .data(false).build();
-            return new ResponseEntity<>(response, httpStatus);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 
     @GetMapping("/get-user-account-list")
     public ResponseEntity<ApiResponse<List<TUserAccount>>> getUserAccountList() {
-        ApiRequest<Object, List<TUserAccount>> request = new ApiRequest<>();
-
+        ApiResponse<List<TUserAccount>> response = new ApiResponse<>();
         try {
-            this.userService.getUserAccountList(request);
-            HttpStatus httpStatus = HttpStatus.OK;
-            ApiResponse<List<TUserAccount>> response = ApiResponse.<List<TUserAccount>>builder()
-                    .status(httpStatus.value())
-                    .message(request.getMessage())
-                    .data(request.getOutput()).build();
-
-            return new ResponseEntity<>(response, httpStatus);
+            this.userService.getUserAccountList(response);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
             HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-            ApiResponse<List<TUserAccount>> response = ApiResponse.<List<TUserAccount>>builder()
-                    .status(httpStatus.value())
+            response = ApiResponse.<List<TUserAccount>>builder()
+                    .status(false)
                     .message(ex.getMessage())
                     .data(new ArrayList<>()).build();
-            return new ResponseEntity<>(response, httpStatus);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
 }
