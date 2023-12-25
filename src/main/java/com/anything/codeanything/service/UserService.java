@@ -1,8 +1,8 @@
-package com.anything.codeanything.modules.user.service;
+package com.anything.codeanything.service;
 
-import com.anything.codeanything.modules.user.model.ApiResponse;
-import com.anything.codeanything.modules.user.model.TUserAccount;
-import com.anything.codeanything.modules.user.model.UserAccountDetails;
+import com.anything.codeanything.model.TUserAccount;
+import com.anything.codeanything.model.UserAccountDetails;
+import com.anything.codeanything.model.ApiResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.anything.codeanything.modules.user.model;
+package com.anything.codeanything.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

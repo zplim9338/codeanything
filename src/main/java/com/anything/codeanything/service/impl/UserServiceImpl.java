@@ -1,11 +1,11 @@
-package com.anything.codeanything.modules.user.service.impl;
+package com.anything.codeanything.service.impl;
 
-import com.anything.codeanything.modules.user.enums.UserStatusEnum;
-import com.anything.codeanything.modules.user.model.ApiResponse;
-import com.anything.codeanything.modules.user.model.TUserAccount;
-import com.anything.codeanything.modules.user.model.UserAccountDetails;
-import com.anything.codeanything.modules.user.repository.UserRepository;
-import com.anything.codeanything.modules.user.service.UserService;
+import com.anything.codeanything.enums.UserStatusEnum;
+import com.anything.codeanything.model.ApiResponse;
+import com.anything.codeanything.model.TUserAccount;
+import com.anything.codeanything.model.UserAccountDetails;
+import com.anything.codeanything.repository.UserRepository;
+import com.anything.codeanything.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

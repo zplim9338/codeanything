@@ -1,9 +1,9 @@
-package com.anything.codeanything.modules.user.contoller;
+package com.anything.codeanything.contoller;
 
-import com.anything.codeanything.modules.user.model.ApiResponse;
-import com.anything.codeanything.modules.user.model.TUserAccount;
-import com.anything.codeanything.modules.user.model.UserAccountDetails;
-import com.anything.codeanything.modules.user.service.UserService;
+import com.anything.codeanything.model.ApiResponse;
+import com.anything.codeanything.model.TUserAccount;
+import com.anything.codeanything.model.UserAccountDetails;
+import com.anything.codeanything.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -81,7 +81,6 @@ public class UserController {
             this.userService.getUserAccountList(response);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
-            HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
             response = ApiResponse.<List<TUserAccount>>builder()
                     .status(false)
                     .message(ex.getMessage())

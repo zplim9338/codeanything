@@ -1,6 +1,6 @@
-package com.anything.codeanything.modules.user.repository;
+package com.anything.codeanything.repository;
 
-import com.anything.codeanything.modules.user.model.TUserAccount;
+import com.anything.codeanything.model.TUserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

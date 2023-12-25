@@ -1,4 +1,4 @@
-package com.anything.codeanything.modules.user.enums;
+package com.anything.codeanything.enums;
 
 public enum UserStatusEnum implements EnumBase {
     INACTIVE(0,"Inactive"),

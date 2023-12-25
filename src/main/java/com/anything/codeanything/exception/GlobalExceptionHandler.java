@@ -1,5 +1,5 @@
-package com.anything.codeanything.modules.user.exception;
-import com.anything.codeanything.modules.user.model.ApiResponse;
+package com.anything.codeanything.exception;
+import com.anything.codeanything.model.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
