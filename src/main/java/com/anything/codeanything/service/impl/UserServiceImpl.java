@@ -26,20 +26,34 @@ public class UserServiceImpl implements UserService {
     @Override
     public void userSignUp(ApiResponse<TUserAccount> refRequest, UserAccountDetails pUserAccountDetails) {
         Boolean status = true;
-        String message = "Sign Up Successfully";
+        String message = "";
+        TUserAccount result = new TUserAccount();
 
-        String passwordSalt = this.generatePasswordSalt();
-        String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
-        TUserAccount userAccount = TUserAccount.builder()
-                .username(pUserAccountDetails.getUsername())
-                .email(pUserAccountDetails.getEmail())
-                .force_change_password(false)
-                .account_status(UserStatusEnum.PENDING.getCode())
-                .password_salt(passwordSalt)
-                .password_hash(passwordHash)
-                .created_date(CurrentUTC).build();
+        //Validation
+        status = userRepository.findByUsernameEquals(pUserAccountDetails.getUsername()).isEmpty();
+        if(!status){ message = "Username has been taken."; }
 
-        TUserAccount result = userRepository.save(userAccount);
+        if(status){
+            status = userRepository.findUserByEmail(pUserAccountDetails.getEmail()).isEmpty();
+            if(!status){ message = "Email has been registered."; }
+        }
+
+        //Save
+        if(status){
+            String passwordSalt = this.generatePasswordSalt();
+            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
+            TUserAccount userAccount = TUserAccount.builder()
+                    .username(pUserAccountDetails.getUsername())
+                    .email(pUserAccountDetails.getEmail())
+                    .force_change_password(false)
+                    .account_status(UserStatusEnum.PENDING.getCode())
+                    .password_salt(passwordSalt)
+                    .password_hash(passwordHash)
+                    .created_date(CurrentUTC).build();
+
+            result = userRepository.save(userAccount);
+            message = "Sign Up Successfully";
+        }
 
         //RETURN DATA
         refRequest.setStatus(status);
@@ -64,9 +78,9 @@ public class UserServiceImpl implements UserService {
         String loginId = pUserAccountDetails.getLogin_id();
         String rawPassword = pUserAccountDetails.getRaw_password();
 
-        TUserAccount userAccount = userRepository.findUserByEmail(loginId);
+        TUserAccount userAccount = userRepository.findUserByEmail(loginId).orElse(null);
         if (userAccount == null) {
-            userAccount = userRepository.findByUsernameEquals(loginId);
+            userAccount = userRepository.findByUsernameEquals(loginId).orElse(null);
         }
         if (userAccount == null) {
             status = false;
