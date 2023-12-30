@@ -19,3 +19,9 @@ mvn spring-boot:run
 # run Dockerfile
 docker build -t codeanything.jar .
 docker run -p 8080:8080 codeanything.jar
+
+# export docker image 
+docker save -o codeanything-api.tar codeanything-app
+
+# import docker image 
+sudo docker load -i codeanything-api.tar
