@@ -150,4 +150,30 @@ public class UserServiceImpl implements UserService {
         String passwordSalt = pUserAccount.getPassword_salt();
         return encoder.matches(pRawPassword + passwordSalt, passwordHash);
     }
+
+    public TUserAccount updateTUserAccount(TUserAccount pUserAccount){
+        return userRepository.save(pUserAccount);
+    }
+
+    @Override
+    public UserAccountDetails mapTUserAccountToUserAccountDetails(TUserAccount pUserAccount) {
+        return UserAccountDetails.builder()
+                .user_id(pUserAccount.getUser_id())
+                .email(pUserAccount.getEmail())
+                .username(pUserAccount.getUsername())
+                .token(pUserAccount.getToken())
+                .force_change_password(pUserAccount.getForce_change_password())
+                .build();
+    }
+
+    @Override
+    public TUserAccount mapUserAccountDetailsTUserAccount(UserAccountDetails pUserAccountDetails) {
+        return TUserAccount.builder()
+                .user_id(pUserAccountDetails.getUser_id())
+                .username(pUserAccountDetails.getUsername())
+                .email(pUserAccountDetails.getEmail())
+                .token(pUserAccountDetails.getToken())
+                .account_status(pUserAccountDetails.getAccount_status())
+                .build();
+    }
 }

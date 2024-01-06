@@ -3,6 +3,7 @@ package com.anything.codeanything.contoller;
 import com.anything.codeanything.model.ApiResponse;
 import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.UserAccountDetails;
+import com.anything.codeanything.service.JwtTokenProvider;
 import com.anything.codeanything.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,11 @@ import java.util.List;
 public class UserController {
     private final String mModule = "user";
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtTokenProvider jwtTokenProvider) {
       this.userService = userService;
+      this.jwtTokenProvider = jwtTokenProvider;
     }
 
     /*
@@ -42,16 +45,55 @@ public class UserController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
+    @PostMapping("/is-authenticated")
+    public ResponseEntity<ApiResponse<String>> TestAuthenticated(@RequestHeader("Authorization") String token, @RequestBody UserAccountDetails pUserAccountDetails) {
+        ApiResponse<String> response = new ApiResponse<>();
+        token = token.split(" ")[1];
+        Boolean isValid = this.jwtTokenProvider.validateToken(token);
+        if (isValid){
+            response = ApiResponse.<String>builder()
+                    .status(true)
+                    .message("Valid Token")
+                    .data("").build();
+        }
+        else{
+            response = ApiResponse.<String>builder()
+                    .status(true)
+                    .message("Invalid Token")
+                    .data("").build();
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 
     @PostMapping("/login-user")
-    public ResponseEntity<ApiResponse<TUserAccount>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
-        ApiResponse<TUserAccount> response = new ApiResponse<>();
+    public ResponseEntity<ApiResponse<UserAccountDetails>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
+        ApiResponse<UserAccountDetails> response = new ApiResponse<>();
 
         try{
-            this.userService.loginUser(response, pUserAccountDetails);
+            ApiResponse<TUserAccount> loginUserResp = new ApiResponse<>();
+
+            //GET USER
+            this.userService.loginUser(loginUserResp, pUserAccountDetails);
+            response.setStatus(loginUserResp.getStatus());
+            response.setMessage(loginUserResp.getMessage());
+            response.setData(this.userService.mapTUserAccountToUserAccountDetails(loginUserResp.getData()));
+
+            //GET & UPDATE TOKEN
+            if(response.getStatus()) {
+                String refreshToken = this.jwtTokenProvider.generateRefreshToken(response.getData().getUsername());
+                String accessToken = this.jwtTokenProvider.generateAccessToken(response.getData().getUsername());
+                UserAccountDetails userAccountDetails = response.getData();
+                userAccountDetails.setToken(refreshToken);
+                userAccountDetails.setAccess_token(accessToken);
+                loginUserResp.getData().setToken(refreshToken);
+                this.userService.updateTUserAccount(loginUserResp.getData());
+                response.setData(userAccountDetails);
+            }
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex){
-            response = ApiResponse.<TUserAccount>builder()
+            response = ApiResponse.<UserAccountDetails>builder()
                     .status(false)
                     .message(ex.getMessage())
                     .data(null).build();
