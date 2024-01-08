@@ -5,6 +5,7 @@ import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.UserAccountDetails;
 import com.anything.codeanything.service.JwtTokenProvider;
 import com.anything.codeanything.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +16,12 @@ import java.util.List;
 
 @RequestMapping("/user")
 @RestController
+@Slf4j
 public class UserController {
     private final String mModule = "user";
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+//    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
     @Autowired
     public UserController(UserService userService, JwtTokenProvider jwtTokenProvider) {
       this.userService = userService;
@@ -69,7 +72,7 @@ public class UserController {
     @PostMapping("/login-user")
     public ResponseEntity<ApiResponse<UserAccountDetails>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
         ApiResponse<UserAccountDetails> response = new ApiResponse<>();
-
+        log.info("User Login:"+pUserAccountDetails.getLogin_id());
         try{
             ApiResponse<TUserAccount> loginUserResp = new ApiResponse<>();
 
@@ -93,6 +96,7 @@ public class UserController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex){
+            log.error(ex.getMessage());
             response = ApiResponse.<UserAccountDetails>builder()
                     .status(false)
                     .message(ex.getMessage())

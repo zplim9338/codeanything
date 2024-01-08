@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Define a RollingFileAppender -->
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Define the log file location -->
+        <file>logs/application.log</file>
+
+        <!-- Define the encoder for log messages -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+
+        <!-- Define the rolling policy based on time -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Set the log file name pattern with date -->
+            <fileNamePattern>logs/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- Set the maximum history (optional) -->
+            <maxHistory>7</maxHistory> <!-- Keep logs for 7 days -->
+        </rollingPolicy>
+    </appender>
+
+    <!-- Set root level and appender -->
+    <root level="INFO">
+        <appender-ref ref="RollingFile" />
+    </root>
+
+</configuration>

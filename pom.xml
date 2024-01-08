@@ -79,6 +79,23 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>2.3.1</version> <!-- or the appropriate version -->
 		</dependency>
+
+		<!-- SLF4J  -->
+		<!-- SLF4J API -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.7</version>
+		</dependency>
+
+		<!-- SLF4J binding, for example, using Logback -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.4.8</version>
+			<scope>runtime</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>
