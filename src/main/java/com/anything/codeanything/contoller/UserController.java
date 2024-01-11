@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.anything.codeanything.model.UserContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +122,9 @@ public class UserController {
     }
 
     @GetMapping("/get-user-account-list")
-    public ResponseEntity<ApiResponse<List<TUserAccount>>> getUserAccountList() {
+    public ResponseEntity<ApiResponse<List<TUserAccount>>> getUserAccountList(@ModelAttribute("userContext") UserContext userContext) {
+        String a = userContext.getUsername();
+        String b = userContext.getIpAddress();
         ApiResponse<List<TUserAccount>> response = new ApiResponse<>();
         try {
             this.userService.getUserAccountList(response);

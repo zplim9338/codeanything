@@ -1,6 +1,7 @@
 package com.anything.codeanything.config;
 
 import com.anything.codeanything.model.ApiResponse;
+import com.anything.codeanything.model.UserContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
@@ -28,6 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        String username = null;
+        String ipAddress = request.getRemoteAddr();
+
         // Perform operations before the request reaches the controller
         // For example, logging the incoming request details
         System.out.println("Request URL: " + request.getRequestURI());
@@ -40,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
 
-                String username = claims.getSubject();
+                username = claims.getSubject();
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, null);
@@ -61,6 +65,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         }
+        // Set user id and IP address in UserContext
+        UserContext userContext = new UserContext();
+        userContext.setUsername(username);
+        userContext.setIpAddress(ipAddress);
+        // Add UserContext to request attributes
+        request.setAttribute("userContext", userContext);
 
         // Continue the filter chain
         filterChain.doFilter(request, response);
