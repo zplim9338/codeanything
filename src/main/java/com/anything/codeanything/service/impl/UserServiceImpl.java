@@ -3,8 +3,9 @@ package com.anything.codeanything.service.impl;
 import com.anything.codeanything.enums.UserStatusEnum;
 import com.anything.codeanything.model.ApiResponse;
 import com.anything.codeanything.model.ChangePasswordRequest;
+import com.anything.codeanything.model.LoginUserRequest;
+import com.anything.codeanything.model.RegisterUserRequest;
 import com.anything.codeanything.model.TUserAccount;
-import com.anything.codeanything.model.UserAccountDetails;
 import com.anything.codeanything.repository.UserRepository;
 import com.anything.codeanything.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,40 +26,47 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void userSignUp(ApiResponse<TUserAccount> refRequest, UserAccountDetails pUserAccountDetails) {
+    public void registerUserValidation(ApiResponse<TUserAccount> refRequest, RegisterUserRequest pRegisterUserRequest) {
         Boolean status = true;
         String message = "";
-        TUserAccount result = new TUserAccount();
 
         //Validation
-        status = userRepository.findByUsernameEquals(pUserAccountDetails.getUsername()).isEmpty();
+        status = userRepository.findByUsernameEquals(pRegisterUserRequest.getUsername()).isEmpty();
         if(!status){ message = "Username has been taken."; }
 
         if(status){
-            status = userRepository.findUserByEmail(pUserAccountDetails.getEmail()).isEmpty();
+            status = userRepository.findUserByEmail(pRegisterUserRequest.getEmail()).isEmpty();
             if(!status){ message = "Email has been registered."; }
         }
 
-        //Save
         if(status){
-            String passwordSalt = this.generatePasswordSalt();
-            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
-            TUserAccount userAccount = TUserAccount.builder()
-                    .username(pUserAccountDetails.getUsername())
-                    .email(pUserAccountDetails.getEmail())
-                    .force_change_password(false)
-                    .account_status(UserStatusEnum.PENDING.getCode())
-                    .password_salt(passwordSalt)
-                    .password_hash(passwordHash)
-                    .created_date(CurrentUTC).build();
-
-            result = userRepository.save(userAccount);
-            message = "Sign Up Successfully";
+            status = !pRegisterUserRequest.getRaw_password().equals(pRegisterUserRequest.getConfirm_password());
+            if(!status){ message = "Your password is mismatched."; }
         }
 
         //RETURN DATA
         refRequest.setStatus(status);
         refRequest.setMessage(message);
+        refRequest.setData(new TUserAccount());
+    }
+
+    @Override
+    public void registerUserSave(ApiResponse<TUserAccount> refRequest, RegisterUserRequest pRegisterUserRequest) {
+        String passwordSalt = this.generatePasswordSalt();
+        String passwordHash = this.generatePasswordHash(pRegisterUserRequest.getRaw_password(), passwordSalt);
+        TUserAccount userAccount = TUserAccount.builder()
+                .username(pRegisterUserRequest.getUsername())
+                .email(pRegisterUserRequest.getEmail())
+                .force_change_password(false)
+                .account_status(UserStatusEnum.PENDING.getCode())
+                .password_salt(passwordSalt)
+                .password_hash(passwordHash)
+                .created_date(CurrentUTC).build();
+
+        TUserAccount result = userRepository.save(userAccount);
+
+        refRequest.setStatus(true);
+        refRequest.setMessage("Sign Up Successfully");
         refRequest.setData(result);
     }
 
@@ -73,11 +81,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void loginUser(ApiResponse<TUserAccount> refRequest, UserAccountDetails pUserAccountDetails){
+    public void loginUserValidation(ApiResponse<TUserAccount> refRequest, LoginUserRequest pLoginUserRequest){
         Boolean status = true;
-        String message = "Login Successfully";
-        String loginId = pUserAccountDetails.getLogin_id();
-        String rawPassword = pUserAccountDetails.getRaw_password();
+        String message = "";
+        String loginId = pLoginUserRequest.getLogin_id();
+        String password = pLoginUserRequest.getPassword();
 
         TUserAccount userAccount = userRepository.findUserByEmail(loginId).orElse(null);
         if (userAccount == null) {
@@ -87,15 +95,18 @@ public class UserServiceImpl implements UserService {
             status = false;
             message = "Account/Password is mismatched.";
         }
-        if (status){
-            status = this.validateUserPassword(userAccount, rawPassword);
-            if(!status){message = "Account/Password is mismatched.";}
+        if (status) {
+            status = this.validateUserPassword(userAccount, password);
+            if (!status) {message = "Account/Password is mismatched.";}
+        }
+        if (status) {
+            message = "Login Successfully";
         }
 
         //RETURN DATA
         refRequest.setStatus(status);
         refRequest.setMessage(message);
-        refRequest.setData(status?userAccount:new TUserAccount());
+        refRequest.setData(userAccount);
     }
 
     @Override
@@ -154,27 +165,5 @@ public class UserServiceImpl implements UserService {
 
     public TUserAccount updateTUserAccount(TUserAccount pUserAccount){
         return userRepository.save(pUserAccount);
-    }
-
-    @Override
-    public UserAccountDetails mapTUserAccountToUserAccountDetails(TUserAccount pUserAccount) {
-        return UserAccountDetails.builder()
-                .user_id(pUserAccount.getUser_id())
-                .email(pUserAccount.getEmail())
-                .username(pUserAccount.getUsername())
-                .token(pUserAccount.getToken())
-                .force_change_password(pUserAccount.getForce_change_password())
-                .build();
-    }
-
-    @Override
-    public TUserAccount mapUserAccountDetailsTUserAccount(UserAccountDetails pUserAccountDetails) {
-        return TUserAccount.builder()
-                .user_id(pUserAccountDetails.getUser_id())
-                .username(pUserAccountDetails.getUsername())
-                .email(pUserAccountDetails.getEmail())
-                .token(pUserAccountDetails.getToken())
-                .account_status(pUserAccountDetails.getAccount_status())
-                .build();
     }
 }

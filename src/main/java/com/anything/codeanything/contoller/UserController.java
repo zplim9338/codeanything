@@ -2,7 +2,10 @@ package com.anything.codeanything.contoller;
 
 import com.anything.codeanything.model.ApiResponse;
 import com.anything.codeanything.model.ChangePasswordRequest;
+import com.anything.codeanything.model.LoginUserRequest;
+import com.anything.codeanything.model.LoginUserResponse;
 import com.anything.codeanything.model.TUserAccount;
+import com.anything.codeanything.model.RegisterUserRequest;
 import com.anything.codeanything.model.UserContext;
 import com.anything.codeanything.model.UserAccountDetails;
 import com.anything.codeanything.service.JwtTokenProvider;
@@ -35,12 +38,17 @@ public class UserController {
      * For errors, it could contain status codes such as 400 (Bad Request), 404 (Not Found), 500 (Internal Server Error), etc., indicating the nature of the error.
      * */
 
-    @PostMapping("/user-sign-up")
-    public ResponseEntity<ApiResponse<TUserAccount>> UserSignUp(@RequestBody UserAccountDetails pUserAccountDetails){
+    @PostMapping("register-user")
+    public ResponseEntity<ApiResponse<TUserAccount>> RegisterUser(@RequestBody RegisterUserRequest pRegisterUserRequest){
         ApiResponse<TUserAccount> response = new ApiResponse<>();
 
         try{
-            this.userService.userSignUp(response, pUserAccountDetails);
+            //Validation
+            this.userService.registerUserValidation(response, pRegisterUserRequest);
+            if (response.getStatus()){
+                //Save
+                this.userService.registerUserSave(response, pRegisterUserRequest);
+            }
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
             response = ApiResponse.<TUserAccount>builder()
@@ -50,56 +58,45 @@ public class UserController {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }
-    @PostMapping("/is-authenticated")
-    public ResponseEntity<ApiResponse<String>> TestAuthenticated(@RequestHeader("Authorization") String token, @RequestBody UserAccountDetails pUserAccountDetails) {
-        ApiResponse<String> response = new ApiResponse<>();
-        token = token.split(" ")[1];
-        Boolean isValid = this.jwtTokenProvider.validateToken(token);
-        if (isValid){
-            response = ApiResponse.<String>builder()
-                    .status(true)
-                    .message("Valid Token")
-                    .data("").build();
-        }
-        else{
-            response = ApiResponse.<String>builder()
-                    .status(true)
-                    .message("Invalid Token")
-                    .data("").build();
-        }
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
 
     @PostMapping("/login-user")
-    public ResponseEntity<ApiResponse<UserAccountDetails>> LoginUser(@RequestBody UserAccountDetails pUserAccountDetails) {
-        ApiResponse<UserAccountDetails> response = new ApiResponse<>();
-        log.info("User Login:"+pUserAccountDetails.getLogin_id());
+    public ResponseEntity<ApiResponse<LoginUserResponse>> LoginUser(@RequestBody LoginUserRequest pLoginUserRequest) {
+        ApiResponse<LoginUserResponse> response = new ApiResponse<>();
         try{
-            ApiResponse<TUserAccount> loginUserResp = new ApiResponse<>();
+            LoginUserResponse loginUserResponse = new LoginUserResponse();
+            //Validation
+            ApiResponse<TUserAccount> userAccountValidationResp = new ApiResponse<>();
+            this.userService.loginUserValidation(userAccountValidationResp, pLoginUserRequest);
 
-            //GET USER
-            this.userService.loginUser(loginUserResp, pUserAccountDetails);
-            response.setStatus(loginUserResp.getStatus());
-            response.setMessage(loginUserResp.getMessage());
-            response.setData(this.userService.mapTUserAccountToUserAccountDetails(loginUserResp.getData()));
+            if(userAccountValidationResp.getStatus()){
+                //SET TOKEN
+                TUserAccount userAccount = userAccountValidationResp.getData();
+                String refreshToken = this.jwtTokenProvider.generateRefreshToken(userAccount.getUser_id());
+                String accessToken = this.jwtTokenProvider.generateAccessToken(userAccount.getUser_id());
+                userAccount.setToken(refreshToken);
+                userAccount = this.userService.updateTUserAccount(userAccount);
 
-            //GET & UPDATE TOKEN
-            if(response.getStatus()) {
-                String refreshToken = this.jwtTokenProvider.generateRefreshToken(response.getData().getUser_id());
-                String accessToken = this.jwtTokenProvider.generateAccessToken(response.getData().getUser_id());
-                UserAccountDetails userAccountDetails = response.getData();
-                userAccountDetails.setToken(refreshToken);
-                userAccountDetails.setAccess_token(accessToken);
-                loginUserResp.getData().setToken(refreshToken);
-                this.userService.updateTUserAccount(loginUserResp.getData());
-                response.setData(userAccountDetails);
+                //Build Response
+                loginUserResponse = LoginUserResponse.builder()
+                        .username(userAccount.getUsername())
+                        .email(userAccount.getEmail())
+                        .access_token(accessToken)
+                        .refresh_token(userAccount.getToken())
+                        .force_change_password(userAccount.getForce_change_password())
+                        .account_status(userAccount.getAccount_status())
+                        .build();
+
+                log.info(String.format("{0} Logged In."), pLoginUserRequest.getLogin_id());
             }
+
+            response.setStatus(userAccountValidationResp.getStatus());
+            response.setMessage(userAccountValidationResp.getMessage());
+            response.setData(loginUserResponse);
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex){
             log.error(ex.getMessage());
-            response = ApiResponse.<UserAccountDetails>builder()
+            response = ApiResponse.<LoginUserResponse>builder()
                     .status(false)
                     .message(ex.getMessage())
                     .data(null).build();
@@ -137,5 +134,25 @@ public class UserController {
                     .data(new ArrayList<>()).build();
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/is-authenticated")
+    public ResponseEntity<ApiResponse<String>> TestAuthenticated(@RequestHeader("Authorization") String token, @RequestBody UserAccountDetails pUserAccountDetails) {
+        ApiResponse<String> response = new ApiResponse<>();
+        token = token.split(" ")[1];
+        Boolean isValid = this.jwtTokenProvider.validateToken(token);
+        if (isValid){
+            response = ApiResponse.<String>builder()
+                    .status(true)
+                    .message("Valid Token")
+                    .data("").build();
+        }
+        else{
+            response = ApiResponse.<String>builder()
+                    .status(true)
+                    .message("Invalid Token")
+                    .data("").build();
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
