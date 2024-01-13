@@ -2,6 +2,7 @@ package com.anything.codeanything.service.impl;
 
 import com.anything.codeanything.enums.UserStatusEnum;
 import com.anything.codeanything.model.ApiResponse;
+import com.anything.codeanything.model.ChangePasswordRequest;
 import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.UserAccountDetails;
 import com.anything.codeanything.repository.UserRepository;
@@ -98,30 +99,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changeUserAccountPassword(ApiResponse<Boolean> request, UserAccountDetails pUserAccountDetails, Boolean pCheckCurrentPassword){
+    public void changeUserAccountPassword(ApiResponse<Boolean> request, ChangePasswordRequest pChangePasswordRequest, Boolean pCheckCurrentPassword){
         Boolean status = true;
         String message = "Password Changed Successfully";
         TUserAccount userAccount = null;
 
         if (status){
-            userAccount = userRepository.findById(pUserAccountDetails.getUser_id()).orElse(null);
+            userAccount = userRepository.findById(pChangePasswordRequest.getUser_id()).orElse(null);
             status = userAccount != null;
             if(!status) {message = "User account not found.";}
         }
 
         if (status && pCheckCurrentPassword){
-            status = this.validateUserPassword(userAccount, pUserAccountDetails.getOld_password());
+            status = this.validateUserPassword(userAccount, pChangePasswordRequest.getOld_password());
             if(!status) {message = "Current password is mismatched.";}
         }
 
         if (status && pCheckCurrentPassword){
-            status = !this.validateUserPassword(userAccount, pUserAccountDetails.getRaw_password());
+            status = !this.validateUserPassword(userAccount, pChangePasswordRequest.getNew_password());
             if(!status) {message = "New password cannot be same with your current password";}
         }
 
         if (status){
             String passwordSalt = this.generatePasswordSalt();
-            String passwordHash = this.generatePasswordHash(pUserAccountDetails.getRaw_password(), passwordSalt);
+            String passwordHash = this.generatePasswordHash(pChangePasswordRequest.getNew_password(), passwordSalt);
             userAccount.setPassword_salt(passwordSalt);
             userAccount.setPassword_hash(passwordHash);
             userRepository.save(userAccount);

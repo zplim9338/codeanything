@@ -1,7 +1,9 @@
 package com.anything.codeanything.contoller;
 
 import com.anything.codeanything.model.ApiResponse;
+import com.anything.codeanything.model.ChangePasswordRequest;
 import com.anything.codeanything.model.TUserAccount;
+import com.anything.codeanything.model.UserContext;
 import com.anything.codeanything.model.UserAccountDetails;
 import com.anything.codeanything.service.JwtTokenProvider;
 import com.anything.codeanything.service.UserService;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.anything.codeanything.model.UserContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +86,8 @@ public class UserController {
 
             //GET & UPDATE TOKEN
             if(response.getStatus()) {
-                String refreshToken = this.jwtTokenProvider.generateRefreshToken(response.getData().getUsername());
-                String accessToken = this.jwtTokenProvider.generateAccessToken(response.getData().getUsername());
+                String refreshToken = this.jwtTokenProvider.generateRefreshToken(response.getData().getUser_id());
+                String accessToken = this.jwtTokenProvider.generateAccessToken(response.getData().getUser_id());
                 UserAccountDetails userAccountDetails = response.getData();
                 userAccountDetails.setToken(refreshToken);
                 userAccountDetails.setAccess_token(accessToken);
@@ -107,10 +108,12 @@ public class UserController {
     }
 
     @PostMapping("/change-user-account-password")
-    public ResponseEntity<ApiResponse<Boolean>> ChangeUserAccountPassword(@RequestBody UserAccountDetails pUserAccountDetails) {
+    public ResponseEntity<ApiResponse<Boolean>> ChangeUserAccountPassword(@RequestBody ChangePasswordRequest pChangePasswordRequest, @ModelAttribute("userContext") UserContext pUserContext) {
         ApiResponse<Boolean> response = new ApiResponse<>();
         try {
-            this.userService.changeUserAccountPassword(response, pUserAccountDetails,true);
+            long user_id = pUserContext.getUser_id();
+            pChangePasswordRequest.setUser_id(user_id);
+            this.userService.changeUserAccountPassword(response, pChangePasswordRequest,true);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
             response = ApiResponse.<Boolean>builder()
@@ -122,9 +125,7 @@ public class UserController {
     }
 
     @GetMapping("/get-user-account-list")
-    public ResponseEntity<ApiResponse<List<TUserAccount>>> getUserAccountList(@ModelAttribute("userContext") UserContext userContext) {
-        String a = userContext.getUsername();
-        String b = userContext.getIpAddress();
+    public ResponseEntity<ApiResponse<List<TUserAccount>>> getUserAccountList() {
         ApiResponse<List<TUserAccount>> response = new ApiResponse<>();
         try {
             this.userService.getUserAccountList(response);

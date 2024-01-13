@@ -56,9 +56,9 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     // Method to generate a JWT access token
-    public String generateAccessToken(String pUsername) {
+    public String generateAccessToken(long pUserId) {
         return Jwts.builder()
-                .setSubject(pUsername)
+                .claim("user_id", String.valueOf(pUserId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
@@ -66,9 +66,9 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     // Method to generate a JWT refresh token
-    public String generateRefreshToken(String pUsername) {
+    public String generateRefreshToken(long pUserId) {
         return Jwts.builder()
-                .setSubject(pUsername)
+                .claim("user_id", String.valueOf(pUserId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
@@ -85,7 +85,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
             TUserAccount userAccount = userRepository.findByUsernameEquals(username).orElse(null);
 
             if (username != null) {
-                return generateAccessToken(userAccount.getUsername());
+                return generateAccessToken(userAccount.getUser_id());
             }
         } catch (Exception e) {
             // Handle token validation failure

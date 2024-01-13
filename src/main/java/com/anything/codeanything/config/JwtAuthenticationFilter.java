@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String username = null;
+        String user_id = "0";
         String ipAddress = request.getRemoteAddr();
 
         // Perform operations before the request reaches the controller
@@ -44,10 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
 
-                username = claims.getSubject();
+                user_id = claims.get("user_id",String.class);
 
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, null);
+                if (user_id != "0" && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(user_id, null, null);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             } catch (ExpiredJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
@@ -67,7 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         // Set user id and IP address in UserContext
         UserContext userContext = new UserContext();
-        userContext.setUsername(username);
+        userContext.setUser_id(Long.parseLong(user_id));
         userContext.setIpAddress(ipAddress);
         // Add UserContext to request attributes
         request.setAttribute("userContext", userContext);

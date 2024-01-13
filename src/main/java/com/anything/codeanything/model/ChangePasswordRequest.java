@@ -7,9 +7,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserContext {
+@NoArgsConstructor
+public class ChangePasswordRequest {
     private long user_id;
-    private String ipAddress;
+    private String old_password;
+    private String new_password;
+    private String confirm_password;
 }

@@ -1,5 +1,6 @@
 package com.anything.codeanything.service;
 
+import com.anything.codeanything.model.ChangePasswordRequest;
 import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.UserAccountDetails;
 import com.anything.codeanything.model.ApiResponse;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface UserService {
     void userSignUp(ApiResponse<TUserAccount> response, UserAccountDetails userAccountDetails);
     void loginUser(ApiResponse<TUserAccount> response, UserAccountDetails userAccountDetails);
-    void changeUserAccountPassword(ApiResponse<Boolean> response, UserAccountDetails userAccountDetails, Boolean checkCurrentPassword);
+    void changeUserAccountPassword(ApiResponse<Boolean> response, ChangePasswordRequest changePasswordRequest, Boolean checkCurrentPassword);
     void getUserAccountList(ApiResponse<List<TUserAccount>> response);
     TUserAccount updateTUserAccount(TUserAccount userAccount);
     UserAccountDetails mapTUserAccountToUserAccountDetails(TUserAccount userAccount);
