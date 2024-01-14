@@ -2,6 +2,7 @@ package com.anything.codeanything.config;
 
 import com.anything.codeanything.model.ApiResponse;
 import com.anything.codeanything.model.UserContext;
+import com.anything.codeanything.service.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Value("${jwt.secret}")
     private String secretKey;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -50,7 +55,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(user_id, null, null);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            } catch (ExpiredJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            } catch (ExpiredJwtException e){
+                user_id = e.getClaims().get("user_id", String.class);
+                String refreshToken = jwtTokenProvider.getRefreshTokenByUserId(Long.parseLong(user_id));
+                String accessToken = jwtTokenProvider.refreshAccessToken(refreshToken);
+                if (accessToken!= null){
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(user_id, null, null);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }else{
+                    // Handle token exceptions here (expired token, malformed token, etc.)
+                    ApiResponse<String> errorResponse = ApiResponse.<String>builder()
+                            .status(false)
+                            .message("Unauthorized: Invalid or expired token")
+                            .data(e.getMessage()).build();
+
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    objectMapper.writeValue(response.getWriter(), errorResponse);
+                    return;
+                }
+            } catch (MalformedJwtException | SignatureException | IllegalArgumentException e) {
                 // Handle token exceptions here (expired token, malformed token, etc.)
                 ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                         .status(false)
@@ -58,7 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .data(e.getMessage()).build();
 
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
-//                response.getWriter().write("Unauthorized: Invalid or expired token");
+                // response.getWriter().write("Unauthorized: Invalid or expired token");
 
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.writeValue(response.getWriter(), errorResponse);

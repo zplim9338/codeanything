@@ -10,4 +10,5 @@ public interface JwtTokenProvider {
     String generateAccessToken(long user_id); // generate a JWT access token
     String generateRefreshToken(long user_id); // generate a JWT refresh token
     String refreshAccessToken(String refreshToken); // validate and refresh access token using refresh token
+    String getRefreshTokenByUserId(long user_id);
 }

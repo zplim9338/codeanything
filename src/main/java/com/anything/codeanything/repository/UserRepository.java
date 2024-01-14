@@ -13,6 +13,9 @@ public interface  UserRepository extends JpaRepository<TUserAccount, Long> {
    @Query(value = "SELECT u FROM TUserAccount u WHERE u.email = :email")
    Optional<TUserAccount> findUserByEmail(@Param("email") String email);
 
+    @Query(value = "SELECT u.token FROM TUserAccount u WHERE u.user_id = :user_id")
+    Optional<String> findTokenByUserId(@Param("user_id") long user_id);
+
     //Method 2
     Optional<TUserAccount> findByEmailEqualsIgnoreCase(String email);
     Optional<TUserAccount> findByUsernameEquals(String username);

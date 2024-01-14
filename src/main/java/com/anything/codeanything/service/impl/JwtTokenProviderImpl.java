@@ -1,6 +1,5 @@
 package com.anything.codeanything.service.impl;
 
-import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.repository.UserRepository;
 import com.anything.codeanything.service.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
@@ -79,20 +78,16 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     public String refreshAccessToken(String pRefreshToken) {
         try {
             Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(pRefreshToken).getBody();
-            String username = claims.getSubject();
+            String user_id = claims.get("user_id", String.class);
+            return generateAccessToken(Long.parseLong(user_id));
 
-            // Implement fetching user details based on username (e.g., from database)
-            TUserAccount userAccount = userRepository.findByUsernameEquals(username).orElse(null);
-
-            if (username != null) {
-                return generateAccessToken(userAccount.getUser_id());
-            }
         } catch (Exception e) {
             // Handle token validation failure
         }
         return null; // Return null if access token refresh fails
     }
 
-
-
+    public String getRefreshTokenByUserId(long pUserId){
+        return userRepository.findTokenByUserId(pUserId).orElse("");
+    }
 }

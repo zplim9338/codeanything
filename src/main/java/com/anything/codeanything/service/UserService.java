@@ -9,7 +9,6 @@ import java.util.List;
 public interface UserService {
     void registerUserValidation(ApiResponse<TUserAccount> response, RegisterUserRequest registerUserRequest);
     void registerUserSave(ApiResponse<TUserAccount> response, RegisterUserRequest registerUserRequest);
-
     void loginUserValidation(ApiResponse<TUserAccount> response, LoginUserRequest loginUserRequest);
     void changeUserAccountPassword(ApiResponse<Boolean> response, ChangePasswordRequest changePasswordRequest, Boolean checkCurrentPassword);
     void getUserAccountList(ApiResponse<List<TUserAccount>> response);
