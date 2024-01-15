@@ -12,6 +12,7 @@ public interface UserService {
     void loginUserValidation(ApiResponse<TUserAccount> response, LoginUserRequest loginUserRequest);
     void changeUserAccountPassword(ApiResponse<Boolean> response, ChangePasswordRequest changePasswordRequest, Boolean checkCurrentPassword);
     void getUserAccountList(ApiResponse<List<TUserAccount>> response);
+    UserProfileResponse getUserProfileById(long user_id);
     TUserAccount updateTUserAccount(TUserAccount userAccount);
     //Other methods as needed
 }

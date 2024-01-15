@@ -1,11 +1,13 @@
 package com.anything.codeanything.service.impl;
 
 import com.anything.codeanything.enums.UserStatusEnum;
+import com.anything.codeanything.mapper.UserMapper;
 import com.anything.codeanything.model.ApiResponse;
 import com.anything.codeanything.model.ChangePasswordRequest;
 import com.anything.codeanything.model.LoginUserRequest;
 import com.anything.codeanything.model.RegisterUserRequest;
 import com.anything.codeanything.model.TUserAccount;
+import com.anything.codeanything.model.UserProfileResponse;
 import com.anything.codeanything.repository.UserRepository;
 import com.anything.codeanything.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +20,13 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private Instant CurrentUTC = Instant.now();
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository,UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -78,6 +82,11 @@ public class UserServiceImpl implements UserService {
         refRequest.setStatus(true);
         refRequest.setMessage(String.valueOf(result.size()) + " User Account(s).");
         refRequest.setData(result);
+    }
+
+    @Override
+    public UserProfileResponse getUserProfileById(long user_id) {
+        return userMapper.getUserProfileById(user_id);
     }
 
     @Override

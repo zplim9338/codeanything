@@ -7,7 +7,7 @@ import com.anything.codeanything.model.LoginUserResponse;
 import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.RegisterUserRequest;
 import com.anything.codeanything.model.UserContext;
-import com.anything.codeanything.model.UserAccountDetails;
+import com.anything.codeanything.model.UserProfileResponse;
 import com.anything.codeanything.service.JwtTokenProvider;
 import com.anything.codeanything.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +26,11 @@ public class UserController {
     private final String mModule = "user";
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
-//    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
+
     @Autowired
-    public UserController(UserService userService, JwtTokenProvider jwtTokenProvider) {
-      this.userService = userService;
-      this.jwtTokenProvider = jwtTokenProvider;
+    public UserController(JwtTokenProvider jwtTokenProvider, UserService userService) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userService = userService;
     }
 
     /*
@@ -136,8 +136,27 @@ public class UserController {
         }
     }
 
+    @GetMapping("/get-user-profile/{user_id}")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getUserProfile(@PathVariable("user_id") String user_id) {
+        ApiResponse<UserProfileResponse> response = new ApiResponse<>();
+        try {
+            UserProfileResponse result = this.userService.getUserProfileById(Long.parseLong(user_id));
+            response = ApiResponse.<UserProfileResponse>builder()
+                    .status(true)
+                    .message("")
+                    .data(result).build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch (Exception ex) {
+            response = ApiResponse.<UserProfileResponse>builder()
+                    .status(false)
+                    .message(ex.getMessage())
+                    .data(null).build();
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/is-authenticated")
-    public ResponseEntity<ApiResponse<String>> TestAuthenticated(@RequestHeader("Authorization") String token, @RequestBody UserAccountDetails pUserAccountDetails) {
+    public ResponseEntity<ApiResponse<String>> TestAuthenticated(@RequestHeader("Authorization") String token, @RequestBody UserProfileResponse pUserProfileResponse) {
         ApiResponse<String> response = new ApiResponse<>();
         token = token.split(" ")[1];
         Boolean isValid = this.jwtTokenProvider.validateToken(token);
