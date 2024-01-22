@@ -11,9 +11,11 @@ import com.anything.codeanything.model.UserProfileResponse;
 import com.anything.codeanything.service.JwtTokenProvider;
 import com.anything.codeanything.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -26,11 +28,13 @@ public class UserController {
     private final String mModule = "user";
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
+    private SqlSessionTemplate sqlSessionTemplate;
 
     @Autowired
-    public UserController(JwtTokenProvider jwtTokenProvider, UserService userService) {
+    public UserController(JwtTokenProvider jwtTokenProvider, UserService userService, SqlSessionTemplate sqlSessionTemplate) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
+        this.sqlSessionTemplate = sqlSessionTemplate;
     }
 
     /*
@@ -105,12 +109,15 @@ public class UserController {
     }
 
     @PostMapping("/change-user-account-password")
+    @Transactional
     public ResponseEntity<ApiResponse<Boolean>> ChangeUserAccountPassword(@RequestBody ChangePasswordRequest pChangePasswordRequest, @ModelAttribute("userContext") UserContext pUserContext) {
         ApiResponse<Boolean> response = new ApiResponse<>();
         try {
             long user_id = pUserContext.getUser_id();
             pChangePasswordRequest.setUser_id(user_id);
-            this.userService.changeUserAccountPassword(response, pChangePasswordRequest,true);
+            this.userService.changeUserAccountPassword(sqlSessionTemplate, response, pChangePasswordRequest,true);
+            // Manually mark the transaction for rollback
+//            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch (Exception ex) {
             response = ApiResponse.<Boolean>builder()

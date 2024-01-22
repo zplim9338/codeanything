@@ -3,6 +3,25 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.anything.codeanything.mapper.UserMapper">
+    <update id="updateUserAccountById" parameterType="com.anything.codeanything.model.TUserAccount">
+        UPDATE
+            T_USER_ACCOUNT
+        SET
+            email = #{tUserAccount.email},
+            password_salt = #{tUserAccount.password_salt},
+            password_hash = #{tUserAccount.password_hash},
+            force_change_password = #{tUserAccount.force_change_password},
+            account_status = #{tUserAccount.account_status},
+            updated_date = UTC_TIMESTAMP()
+        WHERE user_id = #{tUserAccount.user_id}
+    </update>
+    <select id="getTUserAccountById" parameterType="long" resultType="com.anything.codeanything.model.TUserAccount">
+        SELECT
+            user_id, username, email, password_salt, password_hash, token,
+            force_change_password, account_status, created_date, updated_date
+        FROM T_USER_ACCOUNT
+        WHERE user_id = #{user_id}
+    </select>
     <select id="getUserProfileById" parameterType="long"  resultType="com.anything.codeanything.model.UserProfileResponse">
         SELECT
             UA.email, UA.username, UP.first_name, UP.first_name, UP.last_name,

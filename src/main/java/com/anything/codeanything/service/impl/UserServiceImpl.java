@@ -10,6 +10,7 @@ import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.UserProfileResponse;
 import com.anything.codeanything.repository.UserRepository;
 import com.anything.codeanything.service.UserService;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -119,13 +120,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changeUserAccountPassword(ApiResponse<Boolean> request, ChangePasswordRequest pChangePasswordRequest, Boolean pCheckCurrentPassword){
+    public void changeUserAccountPassword(SqlSessionTemplate refSqlSessionTemplate, ApiResponse<Boolean> request, ChangePasswordRequest pChangePasswordRequest, Boolean pCheckCurrentPassword){
         Boolean status = true;
-        String message = "Password Changed Successfully";
+        String message = "";
         TUserAccount userAccount = null;
+        UserMapper userMapperTrans = refSqlSessionTemplate.getMapper(UserMapper.class);
 
         if (status){
-            userAccount = userRepository.findById(pChangePasswordRequest.getUser_id()).orElse(null);
+            userAccount = userMapperTrans.getTUserAccountById(pChangePasswordRequest.getUser_id());
             status = userAccount != null;
             if(!status) {message = "User account not found.";}
         }
@@ -141,11 +143,20 @@ public class UserServiceImpl implements UserService {
         }
 
         if (status){
+            // Create a parameter map with the id and new email
+//            Map<String, Object> parameterMap = new HashMap<>();
+//            parameterMap.put("id", userId);
+//            parameterMap.put("email", newEmail);
             String passwordSalt = this.generatePasswordSalt();
             String passwordHash = this.generatePasswordHash(pChangePasswordRequest.getNew_password(), passwordSalt);
             userAccount.setPassword_salt(passwordSalt);
             userAccount.setPassword_hash(passwordHash);
-            userRepository.save(userAccount);
+            int rowsAffected = userMapperTrans.updateUserAccountById(userAccount);
+            status = rowsAffected > 0;
+        }
+
+        if (status){
+            message = "Password Changed Successfully";
         }
 
         //RETURN DATA
