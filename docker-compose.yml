@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/codeanything
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/codeanything
       SPRING_DATASOURCE_USERNAME: devadmin
       SPRING_DATASOURCE_PASSWORD: admin1234
   #  depends_on:
