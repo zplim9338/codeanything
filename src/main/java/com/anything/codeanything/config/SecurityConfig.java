@@ -17,8 +17,9 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
     private static final String[] WHITE_LIST_URL = {
-        "/user/login-user",
-        "/user/register-user"
+        "/api/user/login-user",
+        "/api/user/register-user",
+        "/api/auth/refresh-token"
     };
 
     @Autowired

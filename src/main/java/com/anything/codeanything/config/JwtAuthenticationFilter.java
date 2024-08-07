@@ -55,27 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(user_id, null, null);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            } catch (ExpiredJwtException e){
-                user_id = e.getClaims().get("user_id", String.class);
-                String refreshToken = jwtTokenProvider.getRefreshTokenByUserId(Long.parseLong(user_id));
-                String accessToken = jwtTokenProvider.refreshAccessToken(refreshToken);
-                if (accessToken!= null){
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(user_id, null, null);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }else{
-                    // Handle token exceptions here (expired token, malformed token, etc.)
-                    ApiResponse<String> errorResponse = ApiResponse.<String>builder()
-                            .status(false)
-                            .message("Unauthorized: Invalid or expired token")
-                            .data(e.getMessage()).build();
-
-                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.writeValue(response.getWriter(), errorResponse);
-                    return;
-                }
-            } catch (MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            } catch (ExpiredJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
                 // Handle token exceptions here (expired token, malformed token, etc.)
                 ApiResponse<String> errorResponse = ApiResponse.<String>builder()
                         .status(false)

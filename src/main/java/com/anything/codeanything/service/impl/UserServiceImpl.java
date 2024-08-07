@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if(status){
-            status = !pRegisterUserRequest.getRaw_password().equals(pRegisterUserRequest.getConfirm_password());
+            status = pRegisterUserRequest.getRaw_password().equals(pRegisterUserRequest.getConfirm_password());
             if(!status){ message = "Your password is mismatched."; }
         }
 

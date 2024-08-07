@@ -90,4 +90,10 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     public String getRefreshTokenByUserId(long pUserId){
         return userRepository.findTokenByUserId(pUserId).orElse("");
     }
+
+    public long extractUserId(String pToken) {
+        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(pToken).getBody();
+        String userId = claims.get("user_id",String.class);
+        return Long.parseLong(userId);
+    }
 }
