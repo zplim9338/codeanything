@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anything.codeanything.mapper.aboutme.AboutMeMapper">
+    <select id="getAboutMe" parameterType="String"  resultType="String">
+        SELECT
+            data.userid
+        FROM T_ABOUTME_USER_JSON data
+        WHERE data.userid = #{user_id};
+    </select>
+    <!-- Other SQL queries -->
+</mapper>

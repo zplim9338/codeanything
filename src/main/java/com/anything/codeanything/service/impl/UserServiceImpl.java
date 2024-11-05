@@ -1,7 +1,7 @@
 package com.anything.codeanything.service.impl;
 
 import com.anything.codeanything.enums.UserStatusEnum;
-import com.anything.codeanything.mapper.UserMapper;
+import com.anything.codeanything.mapper.codeanything.UserMapper;
 import com.anything.codeanything.model.ApiResponse;
 import com.anything.codeanything.model.ChangePasswordRequest;
 import com.anything.codeanything.model.LoginUserRequest;

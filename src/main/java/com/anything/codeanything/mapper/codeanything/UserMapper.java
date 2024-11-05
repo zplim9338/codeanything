@@ -1,4 +1,4 @@
-package com.anything.codeanything.mapper;
+package com.anything.codeanything.mapper.codeanything;
 
 import com.anything.codeanything.model.TUserAccount;
 import com.anything.codeanything.model.UserProfileResponse;

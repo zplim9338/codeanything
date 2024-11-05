@@ -19,7 +19,8 @@ public class SecurityConfig {
     private static final String[] WHITE_LIST_URL = {
         "/api/user/login-user",
         "/api/user/register-user",
-        "/api/auth/refresh-token"
+        "/api/auth/refresh-token",
+        "/api/aboutme/get-aboutme"
     };
 
     @Autowired

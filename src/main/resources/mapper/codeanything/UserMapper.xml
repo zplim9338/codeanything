@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.anything.codeanything.mapper.UserMapper">
+<mapper namespace="com.anything.codeanything.mapper.codeanything.UserMapper">
     <update id="updateUserAccountById" parameterType="com.anything.codeanything.model.TUserAccount">
         UPDATE
             T_USER_ACCOUNT
