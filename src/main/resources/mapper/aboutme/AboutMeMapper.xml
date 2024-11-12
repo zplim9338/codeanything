@@ -5,7 +5,7 @@
 <mapper namespace="com.anything.codeanything.mapper.aboutme.AboutMeMapper">
     <select id="getAboutMe" parameterType="String"  resultType="String">
         SELECT
-            data.userid
+            data.details
         FROM T_ABOUTME_USER_JSON data
         WHERE data.userid = #{user_id};
     </select>

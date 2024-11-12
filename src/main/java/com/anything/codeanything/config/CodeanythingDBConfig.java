@@ -15,7 +15,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan("com.anything.codeanything.mapper.codeanything") // Specify the package for Codeanything mappers
+@MapperScan(basePackages = "com.anything.codeanything.mapper.codeanything", sqlSessionFactoryRef = "codeanythingSqlSessionFactory") // Specify the package for Codeanything mappers
 public class CodeanythingDBConfig {
 
     @Primary

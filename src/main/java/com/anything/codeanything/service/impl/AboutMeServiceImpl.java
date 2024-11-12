@@ -16,6 +16,7 @@ public class AboutMeServiceImpl  implements AboutMeService {
     }
     @Override
     public String getAboutMe(String user_id) {
-        return aboutMeMapper.getAboutMe(user_id);
+        String jsonData = aboutMeMapper.getAboutMe(user_id);
+        return jsonData;
     }
 }

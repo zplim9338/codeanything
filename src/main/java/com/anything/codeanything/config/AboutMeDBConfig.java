@@ -14,7 +14,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import javax.sql.DataSource;
 
 @Configuration
-@MapperScan("com.anything.codeanything.mapper.aboutme") // Specify the package for AboutMe mappers
+@MapperScan(basePackages  = "com.anything.codeanything.mapper.aboutme", sqlSessionFactoryRef = "aboutmeSqlSessionFactory") // Specify the package for AboutMe mappers
 public class AboutMeDBConfig {
 
     @Bean(name = "aboutmeDataSourceProperties")
