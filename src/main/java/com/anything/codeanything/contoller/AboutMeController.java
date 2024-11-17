@@ -41,4 +41,37 @@ public class AboutMeController {
         }
     }
 
+    @PostMapping("/get-tenant-info")
+    public ResponseEntity<ApiResponse<String>> GetTenantInfo(@RequestBody String pTenantId) {
+        ApiResponse<String> response = new ApiResponse<>();
+        try {
+            String jsonResult = this.aboutMeService.getAboutMe(pTenantId);
+            response = ApiResponse.<String>builder()
+                    .status(true)
+                    .message("")
+                    .data(jsonResult).build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch (Exception ex) {
+            response = ApiResponse.<String>builder()
+                    .status(false)
+                    .message(ex.getMessage())
+                    .data("").build();
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/send-telegram-message")
+    public ResponseEntity<ApiResponse<String>> SendTgMsg(@RequestBody String pText) {
+        ApiResponse<String> response = new ApiResponse<>();
+        try {
+            this.aboutMeService.sendTelegramMessage(response, pText);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch (Exception ex) {
+            response = ApiResponse.<String>builder()
+                    .status(false)
+                    .message(ex.getMessage())
+                    .data(null).build();
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

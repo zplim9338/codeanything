@@ -20,7 +20,8 @@ public class SecurityConfig {
         "/api/user/login-user",
         "/api/user/register-user",
         "/api/auth/refresh-token",
-        "/api/aboutme/get-aboutme"
+        "/api/aboutme/get-aboutme",
+        "/api/aboutme/send-telegram-message"
     };
 
     @Autowired
