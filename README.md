@@ -11,7 +11,7 @@ docker-compose -f docker-compose-db.yml up
 docker-compose build
 
 # run docker-compose.yml
-docker-compose up
+docker-compose --env-file .env up
 
 # Manually Run the application
 mvn spring-boot:run
