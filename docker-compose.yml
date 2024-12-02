@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend-app:
-    image: backend-app:3.0
+    image: codeanything:3.0
     build:
       context: .
       dockerfile: Dockerfile
