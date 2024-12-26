@@ -9,5 +9,85 @@
         FROM T_ABOUTME_USER_JSON data
         WHERE data.userid = #{user_id};
     </select>
+
+    <insert id="insertFile" parameterType="com.anything.codeanything.model.TFiles">
+        INSERT INTO T_FILES (
+        uuid,
+        file_name,
+        file_type,
+        file_extension,
+        file_size,
+        mime_type,
+        file_content,
+        upload_date
+        ) VALUES (
+        #{uuid},
+        #{fileName},
+        #{fileType},
+        #{fileExtension},
+        #{fileSize},
+        #{mimeType},
+        #{fileContent},
+        #{uploadDate}
+        )
+    </insert>
+
+
+    <resultMap id="ProfileResultMap" type="com.anything.codeanything.model.TProfile">
+        <id property="uuid" column="uuid"/>
+        <result property="slug" column="slug"/>
+        <result property="nickname" column="nickname"/>
+        <result property="title" column="title"/>
+        <result property="profilePicUrl" column="profile_pic_url"/>
+        <result property="profilePicFileUuid" column="profile_pic_file_uuid"/>
+        <result property="resumeFileUuid" column="resume_file_uuid"/>
+        <result property="introduction" column="introduction"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+        <result property="githubId" column="github_id"/>
+        <result property="linkedinId" column="linkedin_id"/>
+        <result property="whatsappId" column="whatsapp_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+
+        <association property="profilePicFile" javaType="com.anything.codeanything.model.TFiles">
+            <id property="uuid" column="pic_file_uuid"/>
+            <result property="fileName" column="pic_file_name"/>
+            <result property="fileType" column="pic_file_type"/>
+            <result property="fileExtension" column="pic_file_extension"/>
+            <result property="fileSize" column="pic_file_size"/>
+            <result property="mimeType" column="pic_mime_type"/>
+            <result property="fileContent" column="pic_file_content"/>
+            <result property="uploadDate" column="pic_upload_date"/>
+        </association>
+    </resultMap>
+    <select id="getProfileBySlug" resultMap="ProfileResultMap" >
+        SELECT 
+            p.*,
+            pf.uuid as pic_file_uuid,
+            pf.file_name as pic_file_name,
+            pf.file_type as pic_file_type,
+            pf.file_extension as pic_file_extension,
+            pf.file_size as pic_file_size,
+            pf.mime_type as pic_mime_type,
+            pf.file_content as pic_file_content,
+            pf.upload_date as pic_upload_date
+        FROM T_PROFILE p
+        LEFT JOIN T_FILES pf ON p.profile_pic_file_uuid = pf.uuid
+        WHERE p.slug = #{slug}
+    </select>
+
+    <select id="getProfileResume" resultType="com.anything.codeanything.model.TFiles">
+        SELECT 
+            f.file_name as fileName,
+            f.mime_type as mimeType,
+            f.file_size as fileSize,
+            f.file_content as fileContent
+        FROM T_PROFILE p
+        INNER JOIN T_FILES f ON p.resume_file_uuid = f.uuid
+        WHERE p.slug = #{slug}
+    </select>
     <!-- Other SQL queries -->
 </mapper>

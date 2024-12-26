@@ -21,7 +21,9 @@ public class SecurityConfig {
         "/api/user/register-user",
         "/api/auth/refresh-token",
         "/api/aboutme/get-aboutme",
-        "/api/aboutme/send-telegram-message"
+        "/api/aboutme/send-telegram-message",
+        "/api/aboutme/get-profile/**",
+        "/api/aboutme/download-resume/**"
     };
 
     @Autowired
@@ -32,7 +34,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://zpcodespaces.com"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://aboutme.zpcodespaces.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true);  // Allow credentials if needed
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
