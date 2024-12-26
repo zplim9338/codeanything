@@ -89,5 +89,33 @@
         INNER JOIN T_FILES f ON p.resume_file_uuid = f.uuid
         WHERE p.slug = #{slug}
     </select>
+
+    <insert id="insertAuditTrail" parameterType="com.anything.codeanything.model.TAuditTrail">
+        INSERT INTO T_AUDIT_TRAIL (
+            uuid,
+            endpoint,
+            method,
+            request_params,
+            request_body,
+            response_body,
+            status_code,
+            execution_time,
+            ip_address,
+            user_agent,
+            created_at
+        ) VALUES (
+            #{uuid},
+            #{endpoint},
+            #{method},
+            #{requestParams},
+            #{requestBody},
+            #{responseBody},
+            #{statusCode},
+            #{executionTime},
+            #{ipAddress},
+            #{userAgent},
+            #{createdAt}
+        )
+    </insert>
     <!-- Other SQL queries -->
 </mapper>
